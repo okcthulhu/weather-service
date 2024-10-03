@@ -38,7 +38,14 @@ func main() {
 	weatherService = NewWeatherServiceClient(httpClient, apiURL)
 
 	// Route to get weather information based on latitude and longitude.
-	e.GET("/weather", func(c echo.Context) error {
+	e.GET("/weather", weatherHandler(weatherService))
+
+	e.Logger.Fatal(e.Start(":8080"))
+}
+
+func weatherHandler(weatherService WeatherService) echo.HandlerFunc {
+	return func(c echo.Context) error {
+
 		lat := c.QueryParam("lat")
 		lon := c.QueryParam("lon")
 
@@ -66,7 +73,5 @@ func main() {
 				"category": tempCategory,
 			},
 		})
-	})
-
-	e.Logger.Fatal(e.Start(":8080"))
+	}
 }
