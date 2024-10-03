@@ -76,6 +76,7 @@ func (c *WeatherServiceClient) GetWeather(lat, lon string) (string, int, error) 
 		Properties struct {
 			Periods []struct {
 				Name            string `json:"name"`
+				Number          int    `json:"number"`
 				Temperature     int    `json:"temperature"`
 				TemperatureUnit string `json:"temperatureUnit"`
 				ShortForecast   string `json:"shortForecast"`
@@ -87,12 +88,12 @@ func (c *WeatherServiceClient) GetWeather(lat, lon string) (string, int, error) 
 	}
 
 	for _, period := range forecastData.Properties.Periods {
-		if period.Name == "Today" {
+		if period.Number == 1 {
 			return period.ShortForecast, period.Temperature, nil
 		}
 	}
 
-	return "", 0, fmt.Errorf("no forecast found for 'Today'")
+	return "", 0, fmt.Errorf("no forecast found for today")
 }
 
 // CategorizeTemperature categorizes the temperature into "hot", "cold", or "moderate".
