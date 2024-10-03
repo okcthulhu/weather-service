@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"net/http"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -38,40 +37,7 @@ func main() {
 	weatherService = NewWeatherServiceClient(httpClient, apiURL)
 
 	// Route to get weather information based on latitude and longitude.
-	e.GET("/weather", weatherHandler(weatherService))
+	e.GET("/weather", WeatherHandler(weatherService))
 
 	e.Logger.Fatal(e.Start(":8080"))
-}
-
-func weatherHandler(weatherService WeatherService) echo.HandlerFunc {
-	return func(c echo.Context) error {
-
-		lat := c.QueryParam("lat")
-		lon := c.QueryParam("lon")
-
-		if lat == "" || lon == "" {
-			return c.JSON(http.StatusBadRequest, map[string]string{
-				"error": "Latitude and Longitude are required",
-			})
-		}
-
-		// Get weather data
-		forecast, temperature, err := weatherService.GetWeather(lat, lon)
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, map[string]string{
-				"error": err.Error(),
-			})
-		}
-
-		// Categorize the temperature
-		tempCategory := weatherService.CategorizeTemperature(temperature)
-
-		return c.JSON(http.StatusOK, map[string]interface{}{
-			"forecast": forecast,
-			"temperature": map[string]interface{}{
-				"value":    temperature,
-				"category": tempCategory,
-			},
-		})
-	}
 }
