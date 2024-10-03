@@ -29,6 +29,14 @@ func main() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
+	// Initialize the HTTP client
+	var httpClient HTTPClient
+	httpClient = &DefaultHTTPClient{}
+
+	// Create an instance of the WeatherService
+	var weatherService WeatherService
+	weatherService = NewWeatherServiceClient(httpClient, apiURL)
+
 	// Route to get weather information based on latitude and longitude.
 	e.GET("/weather", func(c echo.Context) error {
 		lat := c.QueryParam("lat")
@@ -40,11 +48,8 @@ func main() {
 			})
 		}
 
-		httpClient := &DefaultHTTPClient{}
-		weatherServiceClient := NewWeatherServiceClient(httpClient, apiURL)
-
 		// Get weather data
-		forecast, temperature, err := weatherServiceClient.GetWeather(lat, lon)
+		forecast, temperature, err := weatherService.GetWeather(lat, lon)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, map[string]string{
 				"error": err.Error(),
@@ -52,7 +57,7 @@ func main() {
 		}
 
 		// Categorize the temperature
-		tempCategory := weatherServiceClient.CategorizeTemperature(temperature)
+		tempCategory := weatherService.CategorizeTemperature(temperature)
 
 		return c.JSON(http.StatusOK, map[string]interface{}{
 			"forecast": forecast,
